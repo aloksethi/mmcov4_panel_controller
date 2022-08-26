@@ -1,71 +1,24 @@
-/* USER CODE BEGIN Header */
-/**
-  ******************************************************************************
-  * @file           : main.h
-  * @brief          : Header for main.c file.
-  *                   This file contains the common defines of the application.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2022 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
-/* USER CODE END Header */
+/*
+ * board.h
+ *
+ *  Created on: Jan 25, 2021
+ *      Author: asethi
+ */
 
-/* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __MAIN_H
-#define __MAIN_H
+#ifndef INC_BOARD_H_
+#define INC_BOARD_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
-#include "stm32f4xx_hal.h"
+#include "semphr.h"
 
-#include "board.h"
-#include "trace.h"
-#include "heartbeat.h"
-#include "mlab_handler.h"
-#include "prog_chip_reg.h"
-#include "mlab_nucleo_if.h"
-#include "pot_handler.h"
-//#include "sensor_handler.h"
+extern I2C_HandleTypeDef g_hi2c1;
+extern SPI_HandleTypeDef g_hspi1;
 
-#define CHIP_REG_HANDLER_TASK_PRIORITY		(configMAX_PRIORITIES - 1UL)  //--> programming chip, so when on  should be top one
-#define SYNTH_TASK_PRIORITY					(tskIDLE_PRIORITY + 3UL)
-#define POT_TASK_PRIORITY					(tskIDLE_PRIORITY + 3UL)
-#define MATLAB_HANLDER_TASK_PRIORITY		(tskIDLE_PRIORITY + 2UL)  //-->talking with matlab
-#define SENSOR_TASK_PRIORITY				(tskIDLE_PRIORITY + 1UL)
-#define LED_FLASH_TASK_PRIORITY				(tskIDLE_PRIORITY + 0UL)
-#define LWIP_INIT_TASK_PRIORITY				(tskIDLE_PRIORITY + 0UL)
+extern SemaphoreHandle_t g_mutex_i2c_op;
+extern SemaphoreHandle_t g_mutex_spi_op;
 
-#define CHIP_REG_STACK_SIZE					(2 * configMINIMAL_STACK_SIZE)
-#define SYNTH_STACK_SIZE					(3 * configMINIMAL_STACK_SIZE)
-#define POT_STACK_SIZE						(3 * configMINIMAL_STACK_SIZE)
-#define MATLAB_HANLDER_STACK_SIZE			(3 * configMINIMAL_STACK_SIZE)
-#define SENSOR_STACK_SIZE					(3 * configMINIMAL_STACK_SIZE)
-#define LED_STACK_SIZE						(1 * configMINIMAL_STACK_SIZE)
-#define LWIP_INIT_STACK_SIZE				(2 * configMINIMAL_STACK_SIZE)
-
-
-/* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
-
-/* USER CODE BEGIN EFP */
-
-/* USER CODE END EFP */
-
-/* Private defines -----------------------------------------------------------*/
+#define CHIP_CLK_DELAY				500
+//nss pin is under software control, rest are configed in HAL_SPI_MspInit
 #define USER_Btn_Pin GPIO_PIN_13
 #define USER_Btn_GPIO_Port GPIOC
 #define SYNTH_LATCH_Pin GPIO_PIN_5
@@ -154,12 +107,32 @@ void Error_Handler(void);
 #define LED_BLUE_GPIO_Port GPIOB
 #define REG1V_B1_R2_Pin GPIO_PIN_8
 #define REG1V_B1_R2_GPIO_Port GPIOB
-/* USER CODE BEGIN Private defines */
 
-/* USER CODE END Private defines */
 
-#ifdef __cplusplus
-}
-#endif
+void board_red_led_toggle(void);
+void board_green_led_toggle(void);
+void board_blue_led_toggle(void);
 
-#endif /* __MAIN_H */
+void board_synth_power_on(void);
+void board_synth_power_off(void);
+void board_3v3_power_on(void);
+void board_3v3_power_off(void);
+
+void board_set_lo_switch(uint8_t);
+
+void board_pb_sup1_en(void);
+void board_pb_sup1_dis(void);
+void board_pb_sup2_en(void);
+void board_pb_sup2_dis(void);
+void board_pb_sup3_en(void);
+void board_pb_sup3_dis(void);
+void board_pb_sup4_en(void);
+void board_pb_sup4_dis(void);
+void board_pb_sup5_en(void);
+void board_pb_sup5_dis(void);
+void board_pb_lcl5v_en(void);
+void board_pb_lcl5v_dis(void);
+
+void board_init(void);
+
+#endif /* INC_BOARD_H_ */
