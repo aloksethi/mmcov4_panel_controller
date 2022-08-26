@@ -32,7 +32,18 @@
 #include "lwip/tcpip.h"
 
 /* Within 'USER CODE' section, code will be kept by default at each generation */
-/* USER CODE BEGIN 0 */
+/* USER CODE BEGIN 0 *
+//* code taken from
+ * https://stackoverflow.com/questions/32252996/what-algorithm-can-i-use-to-generate-a-48-bit-hash-for-unique-mac-addresses/47895889#47895889
+ * https://github.com/ztanml/fast-hash/blob/master/fasthash.c
+ */
+
+#define FASTHASH_MIX(h) ({					\
+			(h) ^= (h) >> 23;		\
+			(h) *= 0x2127599bf4325c37ULL;	\
+			(h) ^= (h) >> 47; })
+
+
 
 /* USER CODE END 0 */
 
@@ -166,6 +177,41 @@ void HAL_ETH_ErrorCallback(ETH_HandleTypeDef *handlerEth)
 }
 
 /* USER CODE BEGIN 4 */
+uint64_t fastHash64(const void * buf, size_t len, uint64_t seed)
+{
+    const uint64_t m = 0x880355f21e6d1965ULL;
+    const uint64_t * pos = (const uint64_t*)buf;
+    const uint64_t * end = pos + (len / 8);
+    const unsigned char * pos2;
+    uint64_t h = seed ^ (len * m);
+    uint64_t v;
+
+    while(pos != end)
+    {
+        v  = *pos++;
+        h ^= FASTHASH_MIX(v);
+        h *= m;
+    }
+
+    pos2 = (const unsigned char*)pos;
+    v = 0;
+
+    switch(len & 7)
+    {
+        case 7: v ^= (uint64_t)pos2[6] << 48;
+        case 6: v ^= (uint64_t)pos2[5] << 40;
+        case 5: v ^= (uint64_t)pos2[4] << 32;
+        case 4: v ^= (uint64_t)pos2[3] << 24;
+        case 3: v ^= (uint64_t)pos2[2] << 16;
+        case 2: v ^= (uint64_t)pos2[1] << 8;
+        case 1: v ^= (uint64_t)pos2[0];
+                h ^= FASTHASH_MIX(v);
+                h *= m;
+    }
+
+    return FASTHASH_MIX(h);
+}
+
 
 /* USER CODE END 4 */
 
@@ -182,19 +228,24 @@ void HAL_ETH_ErrorCallback(ETH_HandleTypeDef *handlerEth)
 static void low_level_init(struct netif *netif)
 {
   HAL_StatusTypeDef hal_eth_init_status = HAL_OK;
+  uint64_t hashval;
   uint32_t duplex, speed = 0;
   int32_t PHYLinkState = 0;
   ETH_MACConfigTypeDef MACConf = {0};
   /* Start ETH HAL Init */
 
    uint8_t MACAddr[6] ;
+  hashval = fastHash64((const void *)UID_BASE, 12, 0x0B00B135);// UID_BASE->0x1FFF7A10UL, len-->96bits, seed-->boobies
+  hashval = hashval - (hashval >> 32); // convert it to 32 bit
+
+  trace_printf("hash is 0x%p\n",hashval);
   heth.Instance = ETH;
-  MACAddr[0] = 0x00;
+  MACAddr[0] = 0x02;
   MACAddr[1] = 0x80;
   MACAddr[2] = 0xE1;
-  MACAddr[3] = 0x00;
-  MACAddr[4] = 0x00;
-  MACAddr[5] = 0x00;
+  MACAddr[3] = (hashval & 0xff0000)>>16;
+  MACAddr[4] = (hashval & 0xff00)>>8;
+  MACAddr[5] = (hashval & 0xff);
   heth.Init.MACAddr = &MACAddr[0];
   heth.Init.MediaInterface = HAL_ETH_RMII_MODE;
   heth.Init.TxDesc = DMATxDscrTab;
