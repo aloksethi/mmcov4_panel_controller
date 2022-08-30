@@ -201,8 +201,8 @@ static uint16_t handle_command(mlab_data_t *raw_data_p)
 	case G_UC_PB_SUP_EN:
 	case G_UC_PB_SUP_VAL:
 	{
-		pot_data_t *local_reg_ptr;
-		uint8_t i, num_chunks; //number of chunks of sub data
+		//pot_data_t *local_reg_ptr;
+		//uint8_t i, num_chunks; //number of chunks of sub data
 
 		trace_printf("TODO:command: power_board_supply \n");
 #if 0
@@ -243,10 +243,10 @@ static uint16_t handle_command(mlab_data_t *raw_data_p)
 #endif
 	case G_UC_LO_SWITCH:
 	{
-		uint32_t val;
+//		uint32_t val;
 
 		trace_printf("command: set LO switch \n");
-		val = (uint32_t) (raw_data_p->data[0]); // make LO switch value out of pointer
+//		val = (uint32_t) (raw_data_p->data[0]); // make LO switch value out of pointer
 #if 0
 		TODO:
 		board_set_lo_switch((val & 0x3)); // only 2 bits are used
