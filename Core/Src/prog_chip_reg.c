@@ -28,10 +28,8 @@ static reg_t pc_dflt_reg_dbase[G_MAX_ICS_PER_UC][G_MAX_NUM_REGS];
 static reg_t pc_mini_reg_dbase[G_MAX_ICS_PER_UC][G_MAX_NUM_REGS];
 static reg_t pc_maxi_reg_dbase[G_MAX_ICS_PER_UC][G_MAX_NUM_REGS];
 
-void pc_get_curr_value(uint8_t ic_id, reg_t *local_copy)
-{
-	if ( xSemaphoreTake( pc_mutex_handle, portMAX_DELAY ) == pdTRUE)
-	{
+void pc_get_curr_value(uint8_t ic_id, reg_t *local_copy) {
+	if ( xSemaphoreTake( pc_mutex_handle, portMAX_DELAY ) == pdTRUE) {
 		uint8_t reg_id = local_copy->reg_id;
 		local_copy->cascade = pc_curr_reg_dbase[ic_id - 1][reg_id].cascade;
 		memcpy((void*) local_copy->reg_val,
@@ -43,10 +41,8 @@ void pc_get_curr_value(uint8_t ic_id, reg_t *local_copy)
 	return;
 }
 
-void pc_set_curr_value(uint8_t ic_id, reg_t *local_copy)
-{
-	if ( xSemaphoreTake( pc_mutex_handle, portMAX_DELAY ) == pdTRUE)
-	{
+void pc_set_curr_value(uint8_t ic_id, reg_t *local_copy) {
+	if ( xSemaphoreTake( pc_mutex_handle, portMAX_DELAY ) == pdTRUE) {
 		uint8_t reg_id = local_copy->reg_id;
 		pc_curr_reg_dbase[ic_id - 1][reg_id].reg_id = reg_id;
 		pc_curr_reg_dbase[ic_id - 1][reg_id].cascade = local_copy->cascade;
@@ -58,10 +54,8 @@ void pc_set_curr_value(uint8_t ic_id, reg_t *local_copy)
 	return;
 }
 
-void pc_save_default_value(uint8_t ic_id, reg_t *local_copy)
-{
-	if ( xSemaphoreTake( pc_mutex_handle, portMAX_DELAY ) == pdTRUE)
-	{
+void pc_save_default_value(uint8_t ic_id, reg_t *local_copy) {
+	if ( xSemaphoreTake( pc_mutex_handle, portMAX_DELAY ) == pdTRUE) {
 		uint8_t reg_id = local_copy->reg_id;
 		pc_dflt_reg_dbase[ic_id - 1][reg_id].reg_id = reg_id;
 		pc_dflt_reg_dbase[ic_id - 1][reg_id].cascade = local_copy->cascade;
@@ -74,10 +68,8 @@ void pc_save_default_value(uint8_t ic_id, reg_t *local_copy)
 	return;
 }
 
-void pc_save_mini_value(uint8_t ic_id, reg_t *local_copy)
-{
-	if ( xSemaphoreTake( pc_mutex_handle, portMAX_DELAY ) == pdTRUE)
-	{
+void pc_save_mini_value(uint8_t ic_id, reg_t *local_copy) {
+	if ( xSemaphoreTake( pc_mutex_handle, portMAX_DELAY ) == pdTRUE) {
 		uint8_t reg_id = local_copy->reg_id;
 		pc_mini_reg_dbase[ic_id - 1][reg_id].reg_id = reg_id;
 		pc_mini_reg_dbase[ic_id - 1][reg_id].cascade = local_copy->cascade;
@@ -90,10 +82,8 @@ void pc_save_mini_value(uint8_t ic_id, reg_t *local_copy)
 	return;
 }
 
-void pc_save_maxi_value(uint8_t ic_id, reg_t *local_copy)
-{
-	if ( xSemaphoreTake( pc_mutex_handle, portMAX_DELAY ) == pdTRUE)
-	{
+void pc_save_maxi_value(uint8_t ic_id, reg_t *local_copy) {
+	if ( xSemaphoreTake( pc_mutex_handle, portMAX_DELAY ) == pdTRUE) {
 		uint8_t reg_id = local_copy->reg_id;
 		pc_maxi_reg_dbase[ic_id - 1][reg_id].reg_id = reg_id;
 		pc_maxi_reg_dbase[ic_id - 1][reg_id].cascade = local_copy->cascade;
@@ -106,8 +96,7 @@ void pc_save_maxi_value(uint8_t ic_id, reg_t *local_copy)
 	return;
 }
 
-static void board_set_reg_data(uint8_t data)
-{
+static void board_set_reg_data(uint8_t data) {
 	if (data)
 		HAL_GPIO_WritePin(IC_DIN_GPIO_Port, IC_DIN_Pin, GPIO_PIN_SET);
 	else
@@ -115,23 +104,30 @@ static void board_set_reg_data(uint8_t data)
 	return;
 }
 
-static void board_send_reg_clock(void)
-{
-#if 0
-#TODO:fix me
-	for (int i = 0; i < CHIP_CLK_DELAY; i++)
-		;
-	HAL_GPIO_WritePin(IC_CLK_Port, IC_CLK_Pin, GPIO_PIN_SET);
+static void board_send_reg_clock(uint8_t ic_id) {
+	GPIO_TypeDef *p_port;
+	uint16_t pin;
+
+	if (ic_id < 9) {
+		p_port = IC_CLK_1_2_8_GPIO_Port;
+		pin = IC_CLK_1_2_8_Pin;
+	} else {
+		p_port = IC_CLK_9_2_16_GPIO_Port;
+		pin = IC_CLK_9_2_16_Pin;
+	}
 
 	for (int i = 0; i < CHIP_CLK_DELAY; i++)
 		;
-	HAL_GPIO_WritePin(IC_CLK_Port, IC_CLK_Pin, GPIO_PIN_RESET);
-#endif
+	HAL_GPIO_WritePin(p_port, pin, GPIO_PIN_SET);
+
+	for (int i = 0; i < CHIP_CLK_DELAY; i++)
+		;
+	HAL_GPIO_WritePin(p_port, pin, GPIO_PIN_RESET);
+
 	return;
 }
 
-static void board_send_le_ic1(void)
-{
+static void board_send_le(uint8_t ic_id) {
 #if 0
 #TODO:fix me
 	for (int i = 0; i < CHIP_CLK_DELAY; i++)
@@ -145,21 +141,6 @@ static void board_send_le_ic1(void)
 	return;
 }
 
-static void board_send_le_ic2(void)
-{
-#if 0
-#TODO:fix me
-	for (int i = 0; i < CHIP_CLK_DELAY; i++)
-		;
-	HAL_GPIO_WritePin(IC2_LE_Port, IC2_LE_Pin, GPIO_PIN_SET);
-
-	for (int i = 0; i < CHIP_CLK_DELAY; i++)
-		;
-	HAL_GPIO_WritePin(IC2_LE_Port, IC2_LE_Pin, GPIO_PIN_RESET);
-#endif
-	return;
-}
-
 /*
  * reg_num is the register number-->10bit in mmcov4, 5 bit in older chips.
  * a9...a0, a0 to a4 are for LE1 to LE31, a5...a9 are for LE32 to LE62
@@ -168,8 +149,7 @@ static void board_send_le_ic2(void)
  * num_data_bytes-->num of bytes, should be multiple of 5 as one register is 5 bytes
  * in the buff-->msb is at lowest address and lsb is at the highest address
  */
-static void pc_program_bits(uint8_t ic_id, reg_t *tmp_reg)
-{
+static void pc_program_bits(uint8_t ic_id, reg_t *tmp_reg) {
 	uint8_t ii;
 	uint8_t i;
 	uint8_t tmp_data;
@@ -186,21 +166,19 @@ static void pc_program_bits(uint8_t ic_id, reg_t *tmp_reg)
 			reg_num, ic_id);
 	// shift in data fist,
 	// lsb goes in first
-	for (i = 0; i < num_data_bytes; i++)
-	{
+	for (i = 0; i < num_data_bytes; i++) {
 		/*
 		 * max index 9, min idex 0, last data is saved at G_STORAGE_FOR_ONE_REG_BYTES-1
 		 * i.e., data for hw bits b7..b0 is saved at reg_val[9], b8...b15 is at reg_val[8]
 		 * and so on. data for b72..b79 will be at reg_val[0]
 		 */
 		tmp_data = tmp_reg->reg_val[(G_STORAGE_FOR_ONE_REG_BYTES - 1) - (i)];
-		for (ii = 0; ii < 8; ii++)
-		{
+		for (ii = 0; ii < 8; ii++) {
 			uint8_t val;
 
 			val = (tmp_data & 0x1 << ii) >> ii;
 			board_set_reg_data(val);
-			board_send_reg_clock();
+			board_send_reg_clock(ic_id);
 			bits_txmtd++;
 			if (bits_txmtd >= tot_bits)
 				break;
@@ -209,73 +187,53 @@ static void pc_program_bits(uint8_t ic_id, reg_t *tmp_reg)
 	// send address, as there are two address decoders, lower decoder handles regs 0 to 31 and
 	// higher one handles regs 32 to 62. latch 0 is unused on both
 	// ad0 goes first and ad9 goes last
-	if (reg_num > 31)
-	{
+	if (reg_num > 31) {
 		high_reg_num = reg_num - 31;
 		low_reg_num = 0;
-	}
-	else
-	{
+	} else {
 		high_reg_num = 0;
 		low_reg_num = reg_num;
 	}
 
-	for (ii = 0; ii < 5; ii++)
-	{
+	for (ii = 0; ii < 5; ii++) {
 		uint8_t val;
 
 		val = (low_reg_num & 0x1 << ii) >> ii;
 		board_set_reg_data(val);
-		board_send_reg_clock();
+		board_send_reg_clock(ic_id);
 	}
 
-	for (ii = 0; ii < 5; ii++)
-	{
+	for (ii = 0; ii < 5; ii++) {
 		uint8_t val;
 
 		val = (high_reg_num & 0x1 << ii) >> ii;
 		board_set_reg_data(val);
-		board_send_reg_clock();
+		board_send_reg_clock(ic_id);
 	}
 
 	//send the LE after some extra delay
 	for (i = 0; i < 30; i++)
 		;
 
-	if (ic_id == 1)
-		board_send_le_ic1();
-	else if (ic_id == 2)
-		board_send_le_ic2();
-	else
-	{
-		trace_printf("Wrong IC ID\n");
-		Error_Handler();
-	}
+	board_send_le(ic_id);
 
 	return;
 }
 
-void vChipHandlerTask(void *pvParameters)
-{
+void vChipHandlerTask(void *pvParameters) {
 	pc_queue_data_t pc_queue_local_copy;
 
-	while (1)
-	{
+	while (1) {
 		if (xQueueReceive(g_pc_queue_handle, &pc_queue_local_copy,
-		portMAX_DELAY) == pdPASS)
-		{
-			if ((pc_queue_local_copy.ic_id == 0))
-			{
+		portMAX_DELAY) == pdPASS) {
+			if ((pc_queue_local_copy.ic_id == 0)) {
 				trace_printf("invalid message\n");
 				Error_Handler();
 			}
-			switch (pc_queue_local_copy.command_code)
-			{
+			switch (pc_queue_local_copy.command_code) {
 
-			case G_UC_SET_REG_CONFIG:
-			{
-				if (pc_queue_local_copy.reg_id > G_MAX_NUM_REGS)
-				{
+			case G_UC_SET_REG_CONFIG: {
+				if (pc_queue_local_copy.reg_id > G_MAX_NUM_REGS) {
 					trace_printf("invalid message\n");
 					Error_Handler();
 				}
@@ -288,25 +246,22 @@ void vChipHandlerTask(void *pvParameters)
 				break;
 			}
 
-			case G_UC_APPLY_DEF_REG_CONFIG:
-			{
+			case G_UC_APPLY_DEF_REG_CONFIG: {
 				uint8_t ic_id = pc_queue_local_copy.ic_id;
 				reg_t *local_ptr;
 				uint8_t i;
 
 				if ( xSemaphoreTake(pc_mutex_handle,
-						portMAX_DELAY) == pdTRUE)
-				{
-					board_blue_led_toggle();
+						portMAX_DELAY) == pdTRUE) {
+					board_green_led_toggle();
 
-					for (i = 0; i < G_MAX_NUM_REGS; i++)
-					{
+					for (i = 0; i < G_MAX_NUM_REGS; i++) {
 						local_ptr = &(pc_dflt_reg_dbase[ic_id - 1][i]);
 						for (int del = 0; del < 1000; del++)
 							;
 						pc_program_bits(pc_queue_local_copy.ic_id, local_ptr);
 					}
-					board_blue_led_toggle();
+					board_green_led_toggle();
 
 					xSemaphoreGive(pc_mutex_handle);
 				}
@@ -314,23 +269,20 @@ void vChipHandlerTask(void *pvParameters)
 				break;
 			}
 
-			case G_UC_APPLY_MAXI_REG_CONFIG:
-			{
+			case G_UC_APPLY_MAXI_REG_CONFIG: {
 				uint8_t ic_id = pc_queue_local_copy.ic_id;
 				reg_t *local_ptr;
 				uint8_t i;
 
 				if ( xSemaphoreTake(pc_mutex_handle,
-						portMAX_DELAY) == pdTRUE)
-				{
-					board_blue_led_toggle();
+						portMAX_DELAY) == pdTRUE) {
+					board_green_led_toggle();
 
-					for (i = 0; i < G_MAX_NUM_REGS; i++)
-					{
+					for (i = 0; i < G_MAX_NUM_REGS; i++) {
 						local_ptr = &(pc_maxi_reg_dbase[ic_id - 1][i]);
 						pc_program_bits(pc_queue_local_copy.ic_id, local_ptr);
 					}
-					board_blue_led_toggle();
+					board_green_led_toggle();
 
 					xSemaphoreGive(pc_mutex_handle);
 				}
@@ -338,24 +290,21 @@ void vChipHandlerTask(void *pvParameters)
 				break;
 			}
 
-			case G_UC_APPLY_MINI_REG_CONFIG:
-			{
+			case G_UC_APPLY_MINI_REG_CONFIG: {
 				uint8_t ic_id = pc_queue_local_copy.ic_id;
 				reg_t *local_ptr;
 				uint8_t i;
 
 				if ( xSemaphoreTake(pc_mutex_handle,
-						portMAX_DELAY) == pdTRUE)
-				{
-					board_blue_led_toggle();
+						portMAX_DELAY) == pdTRUE) {
+					board_green_led_toggle();
 
-					for (i = 0; i < G_MAX_NUM_REGS; i++)
-					{
+					for (i = 0; i < G_MAX_NUM_REGS; i++) {
 						local_ptr = &(pc_mini_reg_dbase[ic_id - 1][i]);
 						pc_program_bits(pc_queue_local_copy.ic_id, local_ptr);
 					}
 
-					board_blue_led_toggle();
+					board_green_led_toggle();
 
 					xSemaphoreGive(pc_mutex_handle);
 				}
@@ -370,19 +319,16 @@ void vChipHandlerTask(void *pvParameters)
 	return;
 }
 
-void vStartChipRegTask(UBaseType_t uxPriority)
-{
+void vStartChipRegTask(UBaseType_t uxPriority) {
 	BaseType_t xReturned;
 	g_pc_queue_handle = xQueueCreateStatic(PC_QUEUE_LENGTH,
 			sizeof(pc_queue_data_t), pc_queue_storage_area, &pc_queue_ds);
-	if ( NULL == g_pc_queue_handle)
-	{
+	if ( NULL == g_pc_queue_handle) {
 		trace_printf("failed to create the pc queue\n");
 		Error_Handler();
 	}
 	pc_mutex_handle = xSemaphoreCreateMutexStatic(&pc_mutex_ds);
-	if ( NULL == pc_mutex_handle)
-	{
+	if ( NULL == pc_mutex_handle) {
 		trace_printf("failed to create mutex for register storage data\n");
 		Error_Handler();
 	}
@@ -390,8 +336,7 @@ void vStartChipRegTask(UBaseType_t uxPriority)
 	xReturned = xTaskCreate(vChipHandlerTask, "CHIP",
 	CHIP_REG_STACK_SIZE, NULL, uxPriority,
 			(TaskHandle_t*) &g_handle_chip_reg_task);
-	if (xReturned != pdPASS)
-	{
+	if (xReturned != pdPASS) {
 		trace_printf("failed to create the chip register handling task\n");
 		Error_Handler();
 	}
