@@ -17,6 +17,14 @@ extern SPI_HandleTypeDef g_hspi1;
 extern SemaphoreHandle_t g_mutex_i2c_op;
 extern SemaphoreHandle_t g_mutex_spi_op;
 
+typedef enum
+{
+	R1 = 1,
+	R2,
+	R3,
+	R4
+} pow_plane_t;
+
 #define CHIP_CLK_DELAY				500
 //nss pin is under software control, rest are configed in HAL_SPI_MspInit
 #define USER_Btn_Pin GPIO_PIN_13
@@ -75,8 +83,8 @@ extern SemaphoreHandle_t g_mutex_spi_op;
 #define REG1V_B0_R2_GPIO_Port GPIOC
 #define VDD2_PA_R2_EN_Pin GPIO_PIN_8
 #define VDD2_PA_R2_EN_GPIO_Port GPIOA
-#define VDD2_PA_R2_ENA9_Pin GPIO_PIN_9
-#define VDD2_PA_R2_ENA9_GPIO_Port GPIOA
+#define VDD2_PA_R4_EN_Pin GPIO_PIN_9
+#define VDD2_PA_R4_EN_GPIO_Port GPIOA
 #define REG3V3_SYNTH_EN_Pin GPIO_PIN_10
 #define REG3V3_SYNTH_EN_GPIO_Port GPIOA
 #define USB_DM_Pin GPIO_PIN_11
@@ -108,7 +116,8 @@ extern SemaphoreHandle_t g_mutex_spi_op;
 #define REG1V_B1_R2_Pin GPIO_PIN_8
 #define REG1V_B1_R2_GPIO_Port GPIOB
 
-
+void board_green_led_off(void);
+void board_blue_led_off(void);
 void board_red_led_toggle(void);
 void board_green_led_toggle(void);
 void board_blue_led_toggle(void);
@@ -117,6 +126,8 @@ void board_synth_power_on(void);
 void board_synth_power_off(void);
 void board_3v3_power_on(void);
 void board_3v3_power_off(void);
+void board_2v_pa_power_off(uint8_t ic_id);
+void board_2v_pa_power_on(uint8_t ic_id);
 
 void board_set_lo_switch(uint8_t);
 
