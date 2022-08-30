@@ -8,7 +8,7 @@
 #ifndef INC_MLAB_NUCLEO_IF_H_
 #define INC_MLAB_NUCLEO_IF_H_
 
-#define G_MAX_ICS_PER_UC					2
+#define G_MAX_ICS_PER_UC					16
 #define G_REGS_PER_REG						4		// upto 4 shift registers are cascaded to make one shift register
 #define G_LENGTH_ONE_REG					20 		//number of bits in one shift register
 #define G_MAX_NUM_REGS						63		// two older muxes were cascaded, so one address went there
@@ -53,6 +53,15 @@ typedef struct __attribute__((packed))
 	uint8_t cascade;	// num of shift regs in cascade, most have value 3
 	uint8_t reg_val[G_STORAGE_FOR_ONE_REG_BYTES]; // value saved in bytes
 } reg_t;
+
+typedef struct __attribute__((packed))
+{
+	uint8_t sup_id;
+	uint8_t sup_status;
+	uint8_t pot_val;
+} pot_data_t;
+
+typedef uint32_t pa_regu_pln_t; // 2V PA regulator enable plane R1(1,2,5,6), R2(3,4,7,8)
 
 typedef struct __attribute__((packed))
 {
