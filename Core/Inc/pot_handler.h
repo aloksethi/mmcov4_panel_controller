@@ -22,12 +22,6 @@
 #define I2C_POT_SUP4_CHANNEL		1
 #define I2C_POT_SUP5_CHANNEL		1
 
-typedef struct __attribute__((packed))
-{
-	uint8_t sup_id;
-	uint8_t sup_status;
-	uint8_t pot_val;
-} pot_data_t;
 
 typedef struct __attribute__((packed))
 {
