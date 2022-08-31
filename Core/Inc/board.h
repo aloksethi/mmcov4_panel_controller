@@ -25,6 +25,19 @@ typedef enum
 	R4
 } pow_plane_t;
 
+typedef enum
+{
+	V_0V80 = 1,
+	V_0V85,
+	V_0V90,
+	V_0V95,
+	V_1V00,
+	V_1V05,
+	V_1V10,
+	V_1V15,
+	V_1V20
+} val_1v_t;
+
 #define CHIP_CLK_DELAY				500
 //nss pin is under software control, rest are configed in HAL_SPI_MspInit
 #define USER_Btn_Pin GPIO_PIN_13

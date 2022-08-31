@@ -361,7 +361,7 @@ void board_2v_pa_power_on(uint8_t ic_id) {
 	return;
 }
 
-void board_1v_control(uint8_t ic_id, uint8_t val)
+void board_1v_control(uint8_t ic_id, val_1v_t val)
 {
 	pow_plane_t plane;
 	GPIO_TypeDef *p_port_b0, *p_port_b1;
@@ -396,8 +396,14 @@ void board_1v_control(uint8_t ic_id, uint8_t val)
 		pin_b1 = REG1V_B1_R4_Pin;
 		break;
 	}
+// need 0,1,n Z states on the gpio pin
+	switch (val)
+	{
 
-//TODO: figure out the values to set to the gpios
+	case V_0V80:
+		HAL_GPIO_WritePin(p_port, pin, GPIO_PIN_RESET);
+
+	}
 }
 
 #if 0
