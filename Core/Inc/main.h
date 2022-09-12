@@ -39,6 +39,7 @@ extern "C" {
 #include "prog_chip_reg.h"
 #include "mlab_nucleo_if.h"
 #include "pot_handler.h"
+#include "prog_board_shreg.h"
 //#include "sensor_handler.h"
 
 #define CHIP_REG_HANDLER_TASK_PRIORITY		(configMAX_PRIORITIES - 1UL)  //--> programming chip, so when on  should be top one
