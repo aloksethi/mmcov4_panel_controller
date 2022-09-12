@@ -128,16 +128,7 @@ static void board_send_reg_clock(uint8_t ic_id) {
 }
 
 static void board_send_le(uint8_t ic_id) {
-#if 0
-#TODO:fix me
-	for (int i = 0; i < CHIP_CLK_DELAY; i++)
-		;
-	HAL_GPIO_WritePin(IC1_LE_Port, IC1_LE_Pin, GPIO_PIN_SET);
-
-	for (int i = 0; i < CHIP_CLK_DELAY; i++)
-		;
-	HAL_GPIO_WritePin(IC1_LE_Port, IC1_LE_Pin, GPIO_PIN_RESET);
-#endif
+	shreg_set_le(ic_id);
 	return;
 }
 
