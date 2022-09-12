@@ -114,19 +114,18 @@ static void MX_GPIO_Init(void) {
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOF,
-			SYNTH_LATCH_Pin | REG1V_B1_R1_Pin | REG1V_B0_R1_Pin,
-			GPIO_PIN_RESET);
+	SYNTH_LATCH_Pin | REG1V_B1_R1_Pin | REG1V_B0_R1_Pin, GPIO_PIN_RESET);
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOA,
 			SYNTH2_LATCH_Pin | VDD2_PA_R2_EN_Pin | VDD2_PA_R2_ENA9_Pin
-			| REG3V3_SYNTH_EN_Pin | REG3V3_EN_Pin, GPIO_PIN_RESET);
+					| REG3V3_SYNTH_EN_Pin | REG3V3_EN_Pin, GPIO_PIN_RESET);
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOB,
 			LED_GREEN_Pin | REG1V_B1_R4_Pin | SHREG_LATCH_Pin | SHREG_CLK_Pin
-			| LED_RED_Pin | SHREG_DATA_Pin | REG1V_B0_R4_Pin
-			| LED_BLUE_Pin | REG1V_B1_R2_Pin, GPIO_PIN_RESET);
+					| LED_RED_Pin | SHREG_DATA_Pin | REG1V_B0_R4_Pin
+					| LED_BLUE_Pin | REG1V_B1_R2_Pin, GPIO_PIN_RESET);
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(USB_PowerSwitchOn_GPIO_Port, USB_PowerSwitchOn_Pin,
@@ -135,7 +134,7 @@ static void MX_GPIO_Init(void) {
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOC,
 			REG1V_B0_R3_Pin | REG1V_B1_R3_Pin | IC_DIN_Pin | REG1V_B0_R2_Pin
-			| VDD2_PA_R1_EN_Pin | IC_CLK_1_2_8_Pin | VDD2_PA_R3_EN_Pin,
+					| VDD2_PA_R1_EN_Pin | IC_CLK_1_2_8_Pin | VDD2_PA_R3_EN_Pin,
 			GPIO_PIN_RESET);
 
 	/*Configure GPIO pin Output Level */
@@ -361,11 +360,11 @@ void board_2v_pa_power_on(uint8_t ic_id) {
 	return;
 }
 
-void board_1v_control(uint8_t ic_id, val_1v_t val)
-{
+void board_1v_control(uint8_t ic_id, val_1v_t val) {
 	pow_plane_t plane;
 	GPIO_TypeDef *p_port_b0, *p_port_b1;
 	uint16_t pin_b0, pin_b1;
+	GPIO_InitTypeDef gpio_inits;
 
 	plane = board_icid_to_pow_plane(ic_id);
 
@@ -397,11 +396,86 @@ void board_1v_control(uint8_t ic_id, val_1v_t val)
 		break;
 	}
 // need 0,1,n Z states on the gpio pin
-	switch (val)
-	{
 
+	gpio_inits.Speed = GPIO_SPEED_FREQ_LOW;
+	gpio_inits.Pull = GPIO_NOPULL;
+	//gpio_inits.Alternate = ; no need to fill it
+
+	gpio_inits.Mode = GPIO_MODE_INPUT;
+	switch (val) {
+
+	case V_0V00:
+		shreg_set_1V0_en(0, plane);
+		break;
 	case V_0V80:
-		HAL_GPIO_WritePin(p_port, pin, GPIO_PIN_RESET);
+		gpio_inits.Pin = pin_b0;
+		gpio_inits.Mode = GPIO_MODE_OUTPUT_PP;
+		HAL_GPIO_Init(p_port_b0, &gpio_inits);
+
+		gpio_inits.Pin = pin_b1;
+		gpio_inits.Mode = GPIO_MODE_OUTPUT_PP;
+		HAL_GPIO_Init(p_port_b1, &gpio_inits);
+
+		HAL_GPIO_WritePin(p_port_b0, pin_b0, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(p_port_b1, pin_b1, GPIO_PIN_RESET);
+
+		shreg_set_1V0_en(1, plane);
+		break;
+
+	case V_0V85:
+		gpio_inits.Pin = pin_b0;
+		gpio_inits.Mode = GPIO_MODE_INPUT;
+		HAL_GPIO_Init(p_port_b0, &gpio_inits);
+
+		gpio_inits.Pin = pin_b1;
+		gpio_inits.Mode = GPIO_MODE_OUTPUT_PP;
+		HAL_GPIO_Init(p_port_b1, &gpio_inits);
+
+		HAL_GPIO_WritePin(p_port_b1, pin_b1, GPIO_PIN_RESET);
+
+		shreg_set_1V0_en(1, plane);
+		break;
+
+	case V_0V90:
+		gpio_inits.Pin = pin_b0;
+		gpio_inits.Mode = GPIO_MODE_OUTPUT_PP;
+		HAL_GPIO_Init(p_port_b0, &gpio_inits);
+
+		gpio_inits.Pin = pin_b1;
+		gpio_inits.Mode = GPIO_MODE_OUTPUT_PP;
+		HAL_GPIO_Init(p_port_b1, &gpio_inits);
+
+		HAL_GPIO_WritePin(p_port_b0, pin_b0, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(p_port_b1, pin_b1, GPIO_PIN_RESET);
+
+		shreg_set_1V0_en(1, plane);
+		break;
+
+	case V_0V95:
+		gpio_inits.Pin = pin_b0;
+		gpio_inits.Mode = GPIO_MODE_OUTPUT_PP;
+		HAL_GPIO_Init(p_port_b0, &gpio_inits);
+
+		gpio_inits.Pin = pin_b1;
+		gpio_inits.Mode = GPIO_MODE_INPUT;
+		HAL_GPIO_Init(p_port_b1, &gpio_inits);
+
+		HAL_GPIO_WritePin(p_port_b0, pin_b0, GPIO_PIN_RESET);
+
+		shreg_set_1V0_en(1, plane);
+		break;
+
+	case V_1V00:
+		gpio_inits.Pin = pin_b0;
+		gpio_inits.Mode = GPIO_MODE_INPUT;
+		HAL_GPIO_Init(p_port_b0, &gpio_inits);
+
+		gpio_inits.Pin = pin_b1;
+		gpio_inits.Mode = GPIO_MODE_INPUT;
+		HAL_GPIO_Init(p_port_b1, &gpio_inits);
+
+		shreg_set_1V0_en(1, plane);
+		break;
 
 	}
 }
@@ -497,6 +571,8 @@ void board_init(void) {
 	MX_GPIO_Init();
 	MX_I2C1_Init();
 	MX_SPI1_Init();
+
+	init_shreg();
 
 	g_mutex_i2c_op = xSemaphoreCreateMutex();
 	if (NULL == g_mutex_i2c_op) {

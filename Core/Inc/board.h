@@ -10,6 +10,7 @@
 
 #include "FreeRTOS.h"
 #include "semphr.h"
+#include "mlab_nucleo_if.h"
 
 extern I2C_HandleTypeDef g_hi2c1;
 extern SPI_HandleTypeDef g_hspi1;
@@ -17,26 +18,7 @@ extern SPI_HandleTypeDef g_hspi1;
 extern SemaphoreHandle_t g_mutex_i2c_op;
 extern SemaphoreHandle_t g_mutex_spi_op;
 
-typedef enum
-{
-	R1 = 1,
-	R2,
-	R3,
-	R4
-} pow_plane_t;
 
-typedef enum
-{
-	V_0V80 = 1,
-	V_0V85,
-	V_0V90,
-	V_0V95,
-	V_1V00,
-	V_1V05,
-	V_1V10,
-	V_1V15,
-	V_1V20
-} val_1v_t;
 
 #define CHIP_CLK_DELAY				500
 //nss pin is under software control, rest are configed in HAL_SPI_MspInit
@@ -129,6 +111,7 @@ typedef enum
 #define REG1V_B1_R2_Pin GPIO_PIN_8
 #define REG1V_B1_R2_GPIO_Port GPIOB
 
+pow_plane_t board_icid_to_pow_plane(uint8_t ic_id);
 void board_green_led_off(void);
 void board_blue_led_off(void);
 void board_red_led_toggle(void);
@@ -141,6 +124,7 @@ void board_3v3_power_on(void);
 void board_3v3_power_off(void);
 void board_2v_pa_power_off(uint8_t ic_id);
 void board_2v_pa_power_on(uint8_t ic_id);
+void board_1v_control(uint8_t ic_id, val_1v_t val);
 
 void board_set_lo_switch(uint8_t);
 
