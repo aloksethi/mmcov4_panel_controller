@@ -15,21 +15,17 @@
 
 #include "queue.h"
 
-
 static uint8_t g_rcv_buffer[2048]; // biggest payload
 static TaskHandle_t g_handle_mlab_task;
 
 //static sensor_data_t *sensor_queue_ptr;
 
-static uint16_t handle_command(mlab_data_t *raw_data_p)
-{
+static uint16_t handle_command(mlab_data_t *raw_data_p) {
 	uint16_t data_to_return = 0;
 
-	switch (raw_data_p->command_code)
-	{
+	switch (raw_data_p->command_code) {
 
-	case G_UC_SET_REG_CONFIG:
-	{
+	case G_UC_SET_REG_CONFIG: {
 		uint8_t ic_id;
 		uint8_t i, num_chunks; //number of chunks of sub data
 		reg_t *local_reg_ptr;
@@ -40,8 +36,7 @@ static uint16_t handle_command(mlab_data_t *raw_data_p)
 
 		ic_id = raw_data_p->ic_id;
 		num_chunks = raw_data_p->num_chunks;
-		for (i = 0; i < num_chunks; i++)
-		{
+		for (i = 0; i < num_chunks; i++) {
 			//&raw_data_p->data[0] is a pointer to void and is of size 4, so adding 2 will increment it by8
 			local_reg_ptr = (reg_t*) ((uint8_t*) (&raw_data_p->data[0])
 					+ i * sizeof(reg_t));
@@ -56,18 +51,16 @@ static uint16_t handle_command(mlab_data_t *raw_data_p)
 		break;
 	}
 
-	case G_UC_SAVE_DEF_REG_CONFIG:
-	{
+	case G_UC_SAVE_DEF_REG_CONFIG: {
 		uint8_t ic_id;
 		uint8_t i, num_chunks; //number of chunks of sub data
 		reg_t *local_reg_ptr;
 
-		trace_printf("command: save_def, num_chunks:%d \n", num_chunks);
-
 		ic_id = raw_data_p->ic_id;
 		num_chunks = raw_data_p->num_chunks;
-		for (i = 0; i < num_chunks; i++)
-		{
+
+		trace_printf("command: save_def, num_chunks:%d \n", num_chunks);
+		for (i = 0; i < num_chunks; i++) {
 			local_reg_ptr = (reg_t*) ((uint8_t*) (&raw_data_p->data[0])
 					+ i * sizeof(reg_t));
 			pc_save_default_value(ic_id, local_reg_ptr);
@@ -75,8 +68,7 @@ static uint16_t handle_command(mlab_data_t *raw_data_p)
 		break;
 	}
 
-	case G_UC_SAVE_MINI_REG_CONFIG:
-	{
+	case G_UC_SAVE_MINI_REG_CONFIG: {
 		uint8_t ic_id;
 		uint8_t i, num_chunks; //number of chunks of sub data
 		reg_t *local_reg_ptr;
@@ -85,8 +77,7 @@ static uint16_t handle_command(mlab_data_t *raw_data_p)
 
 		ic_id = raw_data_p->ic_id;
 		num_chunks = raw_data_p->num_chunks;
-		for (i = 0; i < num_chunks; i++)
-		{
+		for (i = 0; i < num_chunks; i++) {
 			local_reg_ptr = (reg_t*) ((uint8_t*) (&raw_data_p->data[0])
 					+ i * sizeof(reg_t));
 			pc_save_mini_value(ic_id, local_reg_ptr);
@@ -94,8 +85,7 @@ static uint16_t handle_command(mlab_data_t *raw_data_p)
 		break;
 	}
 
-	case G_UC_SAVE_MAXI_REG_CONFIG:
-	{
+	case G_UC_SAVE_MAXI_REG_CONFIG: {
 		uint8_t ic_id;
 		uint8_t i, num_chunks; //number of chunks of sub data
 		reg_t *local_reg_ptr;
@@ -104,8 +94,7 @@ static uint16_t handle_command(mlab_data_t *raw_data_p)
 
 		ic_id = raw_data_p->ic_id;
 		num_chunks = raw_data_p->num_chunks;
-		for (i = 0; i < num_chunks; i++)
-		{
+		for (i = 0; i < num_chunks; i++) {
 			local_reg_ptr = (reg_t*) ((uint8_t*) (&raw_data_p->data[0])
 					+ i * sizeof(reg_t));
 			pc_save_maxi_value(ic_id, local_reg_ptr);
@@ -113,8 +102,7 @@ static uint16_t handle_command(mlab_data_t *raw_data_p)
 		break;
 	}
 
-	case G_UC_APPLY_DEF_REG_CONFIG:
-	{
+	case G_UC_APPLY_DEF_REG_CONFIG: {
 		uint8_t ic_id;
 		pc_queue_data_t queue_post;
 
@@ -129,8 +117,7 @@ static uint16_t handle_command(mlab_data_t *raw_data_p)
 		break;
 	}
 
-	case G_UC_APPLY_MAXI_REG_CONFIG:
-	{
+	case G_UC_APPLY_MAXI_REG_CONFIG: {
 		uint8_t ic_id;
 		pc_queue_data_t queue_post;
 
@@ -145,8 +132,7 @@ static uint16_t handle_command(mlab_data_t *raw_data_p)
 		break;
 	}
 
-	case G_UC_APPLY_MINI_REG_CONFIG:
-	{
+	case G_UC_APPLY_MINI_REG_CONFIG: {
 		uint8_t ic_id;
 		pc_queue_data_t queue_post;
 
@@ -161,8 +147,7 @@ static uint16_t handle_command(mlab_data_t *raw_data_p)
 		break;
 	}
 
-	case G_UC_SYNTH_POWER:
-	{
+	case G_UC_SYNTH_POWER: {
 		uint32_t val;
 
 		trace_printf("command: synth_power \n");
@@ -175,15 +160,13 @@ static uint16_t handle_command(mlab_data_t *raw_data_p)
 		break;
 	}
 
-	case G_UC_SYNTH_CONFIG:
-	{
+	case G_UC_SYNTH_CONFIG: {
 		trace_printf("command: synth_config \n");
 
 		break;
 	}
 
-	case G_UC_3V3_POWER:
-	{
+	case G_UC_3V3_POWER: {
 		uint32_t val;
 
 		trace_printf("command: 3V3_power \n");
@@ -198,30 +181,31 @@ static uint16_t handle_command(mlab_data_t *raw_data_p)
 		break;
 	}
 
-	case G_UC_PB_SUP_EN:
-	case G_UC_PB_SUP_VAL:
-	{
-		//pot_data_t *local_reg_ptr;
-		//uint8_t i, num_chunks; //number of chunks of sub data
+	case G_UC_1V0_POWER: {
+		uint8_t ic_id;
+		pow1_1v_data_t *local_reg_ptr;
+		val_1v_t val;
 
-		trace_printf("TODO:command: power_board_supply \n");
-#if 0
-		pot_queue_data_t queue_post;
-		num_chunks = raw_data_p->num_chunks;
-		for (i = 0; i < num_chunks; i++)
-		{
-			local_reg_ptr = (pot_data_t*) ((uint8_t*) (&raw_data_p->data[0])
-					+ i * sizeof(pot_data_t));
+		ic_id = raw_data_p->ic_id;
+		local_reg_ptr = (pow1_1v_data_t*) (&raw_data_p->data[0]);
+		val = local_reg_ptr->val;
 
-			queue_post.command_code = raw_data_p->command_code;
-			queue_post.pot_data.sup_id = local_reg_ptr->sup_id;
-			queue_post.pot_data.sup_status = local_reg_ptr->sup_status;
-			queue_post.pot_data.pot_val = local_reg_ptr->pot_val;
+		trace_printf("command: 1V power supply \n");
 
-			xQueueSendToBack(g_pot_queue_handle, &queue_post, portMAX_DELAY);
-		}
-#endif
+		board_1v_control(ic_id, val);
+		break;
+	}
 
+	case G_UC_1V5_POWER: {
+
+		val_1v5_t *pval;
+
+		pval = (val_1v5_t*) (&raw_data_p->data[0]);
+
+
+		trace_printf("command: 1V5 power supply, val:%d \n", *pval);
+
+		shreg_set_1V5_en(*pval);
 		break;
 	}
 #if 0
@@ -241,37 +225,21 @@ static uint16_t handle_command(mlab_data_t *raw_data_p)
 		break;
 	}
 #endif
-	case G_UC_LO_SWITCH:
-	{
-//		uint32_t val;
-
-		trace_printf("command: set LO switch \n");
-//		val = (uint32_t) (raw_data_p->data[0]); // make LO switch value out of pointer
-#if 0
-		TODO:
-		board_set_lo_switch((val & 0x3)); // only 2 bits are used
-#endif
-		break;
-	}
-
 	}
 
 	return data_to_return;
 }
-static uint8_t sanity_check(mlab_data_t *raw_data_p)
-{
+static uint8_t sanity_check(mlab_data_t *raw_data_p) {
 	uint8_t sane = 0;
 
 	if ((raw_data_p->command_code <= G_UC_MIN_COMMAND_CODE)
-			|| (raw_data_p->command_code >= G_UC_MAX_COMMAND_CODE))
-	{
+			|| (raw_data_p->command_code >= G_UC_MAX_COMMAND_CODE)) {
 		trace_printf("invalid command code : %d\n", raw_data_p->command_code);
 		sane = 0;
 		return sane;
 	}
 
-	if ((raw_data_p->ic_id == 0) || (raw_data_p->ic_id > G_MAX_ICS_PER_UC))
-	{
+	if ((raw_data_p->ic_id == 0) || (raw_data_p->ic_id > G_MAX_ICS_PER_UC)) {
 		trace_printf("invalid ic_id\n");
 		sane = 0;
 		return sane;
@@ -284,20 +252,17 @@ static uint8_t sanity_check(mlab_data_t *raw_data_p)
 		return sane;
 	}
 
-	if (raw_data_p->command_code == G_UC_SET_REG_CONFIG)
-	{
+	if (raw_data_p->command_code == G_UC_SET_REG_CONFIG) {
 		uint8_t num_regs, i;
 
 		num_regs = raw_data_p->num_chunks;
 
-		if (num_regs == 0)
-		{
+		if (num_regs == 0) {
 			trace_printf("invalid number of registers in the buffer\n");
 			sane = 0;
 			return sane;
 		}
-		for (i = 0; i < num_regs; i++)
-		{
+		for (i = 0; i < num_regs; i++) {
 			reg_t *local_reg_ptr;
 			uint8_t reg_id, cascade;
 
@@ -305,8 +270,7 @@ static uint8_t sanity_check(mlab_data_t *raw_data_p)
 			reg_id = local_reg_ptr->reg_id;
 			cascade = local_reg_ptr->cascade;
 
-			if ((cascade > G_REGS_PER_REG) || (reg_id > G_MAX_NUM_REGS))
-			{
+			if ((cascade > G_REGS_PER_REG) || (reg_id > G_MAX_NUM_REGS)) {
 				trace_printf("invalid arguments\n");
 				sane = 0;
 				return sane;
@@ -314,74 +278,76 @@ static uint8_t sanity_check(mlab_data_t *raw_data_p)
 		}
 	}
 
-	if (raw_data_p->command_code == G_UC_PB_SUP_EN)
-	{
-		pot_data_t *local_reg_ptr;
-		uint8_t i, num_chunks, sup_id; //number of chunks of sub data
+	if (raw_data_p->command_code == G_UC_1V0_POWER) {
+		pow1_1v_data_t *local_reg_ptr;
+		uint8_t num_chunks;
+		pow_plane_t plane_id; //number of chunks of sub data
+		val_1v_t val;
 
 		num_chunks = raw_data_p->num_chunks;
-		for (i = 0; i < num_chunks; i++)
-		{
-			local_reg_ptr = (pot_data_t*) (&raw_data_p->data[0]
-					+ i * sizeof(pot_data_t));
+		if (num_chunks) {
+			sane = 0;
+			trace_printf("only one chunk allowed\n");
+			return sane;
+		}
+		local_reg_ptr = (pow1_1v_data_t*) (&raw_data_p->data[0]);
+		plane_id = board_icid_to_pow_plane(raw_data_p->ic_id);
 
-			sup_id = local_reg_ptr->sup_id;
-			if ((sup_id == 0) || (sup_id > G_PB_SUP_ALL))
-			{
-				sane = 0;
-				trace_printf("invalid supply id\n");
-				return sane;
-			}
+		val = local_reg_ptr->val;
 
+		switch (plane_id) {
+		case R1:
+		case R2:
+		case R3:
+		case R4:
+			break;
+		default:
+			sane = 0;
+			trace_printf("invalid plane id\n");
+			return sane;
+		}
+
+		switch (val) {
+		case V_0V00:
+		case V_0V80:
+		case V_0V85:
+		case V_0V90:
+		case V_0V95:
+		case V_1V00:
+		case V_1V05:
+		case V_1V10:
+		case V_1V15:
+		case V_1V20:
+			break;
+		default:
+			sane = 0;
+			trace_printf("invalid value \n");
+			return sane;
 		}
 	}
-	if (raw_data_p->command_code == G_UC_PB_SUP_VAL)
-	{
-		pot_data_t *local_reg_ptr;
-		uint8_t i, num_chunks, sup_id; //number of chunks of sub data
-
-		num_chunks = raw_data_p->num_chunks;
-		for (i = 0; i < num_chunks; i++)
-		{
-			local_reg_ptr = (pot_data_t*) (&raw_data_p->data[0]
-					+ i * sizeof(pot_data_t));
-
-			sup_id = local_reg_ptr->sup_id;
-			if ((sup_id == 0) || (sup_id >= G_PB_SUP_ALL))
-			{
-				sane = 0;
-				trace_printf("invalid supply id\n");
-				return sane;
-			}
-
-		}
-	}
-
 	sane = 1;
 	return sane;
 }
-static portTASK_FUNCTION( vMlabHandlerTask, pvParameters )
-{
+
+static portTASK_FUNCTION( vMlabHandlerTask, pvParameters ) {
 	/* The parameters are not used. */
 	(void) pvParameters;
 
 	static struct netconn *conn;
 	static struct netbuf *buf;
-	static ip_addr_t *addr;
-	static unsigned short port;
+//	static ip_addr_t *addr;
+//	static unsigned short port;
 	err_t err;
-	int8_t ret_data[4];
+	char ret_data[4];
 	void *ptr_payload = NULL;
 
 	conn = netconn_new(NETCONN_UDP);
 	LWIP_ASSERT("con != NULL", conn != NULL);
 	netconn_bind(conn, NULL, G_NUCLEO_PORT_NUM);
 
-	while (1)
-	{
+	while (1) {
 		err = netconn_recv(conn, &buf);
-		if (err == ERR_OK)
-		{
+		if (err == ERR_OK) {
 			mlab_data_t *raw_data_p;
 			uint8_t sane;
 			uint16_t len;
@@ -389,17 +355,16 @@ static portTASK_FUNCTION( vMlabHandlerTask, pvParameters )
 			uint16_t data_to_return;
 			uint16_t tot_amt_to_return;
 
-			addr = netbuf_fromaddr(buf);
-			port = netbuf_fromport(buf);
+//			addr = netbuf_fromaddr(buf);
+//			port = netbuf_fromport(buf);
 			//netconn_connect(conn, addr, port);
-			if (sizeof(g_rcv_buffer) <= buf->p->tot_len)
-			{
+			if (sizeof(g_rcv_buffer) <= buf->p->tot_len) {
 				trace_printf("total packet bigger than available buffer\n");
 				Error_Handler();
 			}
 			netbuf_copy(buf, g_rcv_buffer, buf->p->tot_len);
 
-			trace_printf("rcvd udp, src_port:%d, ipaddr:", port);
+//			trace_printf("rcvd udp, src_port:%d, ipaddr:", port);
 			ip4_addr_debug_print(LWIP_DBG_ON, addr);
 			trace_printf("\n");
 
@@ -410,13 +375,10 @@ static portTASK_FUNCTION( vMlabHandlerTask, pvParameters )
 
 			sane = sanity_check(raw_data_p);
 
-			if (sane)
-			{
+			if (sane) {
 				strcpy(ret_data, "OK");
 				data_to_return = handle_command(raw_data_p);
-			}
-			else
-			{
+			} else {
 				strcpy(ret_data, "NOK");
 			}
 
@@ -424,22 +386,19 @@ static portTASK_FUNCTION( vMlabHandlerTask, pvParameters )
 			//trace_printf("len of buf=%d\n", len);
 			tot_amt_to_return = data_to_return + sizeof(running_id)
 					+ sizeof(ret_data);
-			if (len < tot_amt_to_return)
-			{
+			if (len < tot_amt_to_return) {
 				//trace_printf("FIXME:less bytes availabel");
 				netbuf_free(buf);
 				ptr_payload = netbuf_alloc(buf, tot_amt_to_return);
 			}
 
-			if (NULL != ptr_payload)
-			{
+			if (NULL != ptr_payload) {
 				*(uint32_t*) (ptr_payload) = htonl(running_id);
 //				memcpy(ptr_payload + sizeof(running_id), ret_data,
 //						sizeof(ret_data) + sizeof(uint32_t));
 				memcpy(ptr_payload + sizeof(running_id), ret_data,
 						sizeof(ret_data));
-				if (data_to_return)
-				{
+				if (data_to_return) {
 					trace_printf("no data to return");
 #if 0
 					memcpy(ptr_payload + sizeof(running_id) + sizeof(ret_data),
@@ -453,9 +412,7 @@ static portTASK_FUNCTION( vMlabHandlerTask, pvParameters )
 				//LWIP_DEBUGF(LWIP_DBG_ON, ("got %s\n", buffer));
 				netbuf_delete(buf);
 
-			}
-			else
-			{
+			} else {
 				trace_printf("unable to allocate return data \n");
 			}
 
@@ -463,15 +420,13 @@ static portTASK_FUNCTION( vMlabHandlerTask, pvParameters )
 	}
 } /*lint !e715 !e818 !e830 Function definition must be standard for task creation. */
 
-void vStartMlabHandlerTask(UBaseType_t uxPriority)
-{
+void vStartMlabHandlerTask(UBaseType_t uxPriority) {
 	BaseType_t xReturned;
 
 	xReturned = xTaskCreate(vMlabHandlerTask, "MLABHx",
 	MATLAB_HANLDER_STACK_SIZE, NULL, uxPriority,
 			(TaskHandle_t*) &g_handle_mlab_task);
-	if (xReturned != pdPASS)
-	{
+	if (xReturned != pdPASS) {
 		/* The task was created.  Use the task's handle to delete the task. */
 		trace_printf("failed to create the matlab handler task\n");
 	}
