@@ -32,8 +32,8 @@
 #include "lwip/tcpip.h"
 
 /* Within 'USER CODE' section, code will be kept by default at each generation */
-/* USER CODE BEGIN 0 *
-//* code taken from
+/* USER CODE BEGIN 0 */
+/* code taken from
  * https://stackoverflow.com/questions/32252996/what-algorithm-can-i-use-to-generate-a-48-bit-hash-for-unique-mac-addresses/47895889#47895889
  * https://github.com/ztanml/fast-hash/blob/master/fasthash.c
  */
