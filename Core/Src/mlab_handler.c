@@ -161,7 +161,7 @@ static uint16_t handle_command(mlab_data_t *raw_data_p) {
 	}
 
 	case G_UC_SYNTH_CONFIG: {
-		trace_printf("command: synth_config \n");
+		trace_printf("command: TODO: synth_config not implemeted\n");
 
 		break;
 	}
@@ -202,12 +202,33 @@ static uint16_t handle_command(mlab_data_t *raw_data_p) {
 
 		pval = (val_1v5_t*) (&raw_data_p->data[0]);
 
-
 		trace_printf("command: 1V5 power supply, val:%d \n", *pval);
 
 		shreg_set_1V5_en(*pval);
 		break;
 	}
+
+	case G_UC_2V75_POWER: {
+
+		val_1v5_t *pval;
+
+		pval = (val_1v5_t*) (&raw_data_p->data[0]);
+
+		trace_printf("command: 2V75 power supply, val:%d \n", *pval);
+
+		shreg_set_2V75_en(*pval);
+		break;
+	}
+
+	case G_UC_RX_BB_SW:
+	case G_UC_TX_BB_AMP:
+	case G_UC_IREF:
+	case G_UC_2V0_POWER:
+	case G_UC_REFCLK:
+
+	case G_UC_PA_GATE_BIAS:
+		trace_printf("TODO:command not implemented yet\n");
+		break;
 #if 0
 	case G_UC_PB_SENSORS:
 	{

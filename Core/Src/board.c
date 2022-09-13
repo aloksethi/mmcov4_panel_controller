@@ -477,6 +477,64 @@ void board_1v_control(uint8_t ic_id, val_1v_t val) {
 		shreg_set_1V0_en(1, plane);
 		break;
 
+	case V_1V05:
+		gpio_inits.Pin = pin_b0;
+		gpio_inits.Mode = GPIO_MODE_OUTPUT_PP;
+		HAL_GPIO_Init(p_port_b0, &gpio_inits);
+
+		gpio_inits.Pin = pin_b1;
+		gpio_inits.Mode = GPIO_MODE_INPUT;
+		HAL_GPIO_Init(p_port_b1, &gpio_inits);
+
+		HAL_GPIO_WritePin(p_port_b0, pin_b0, GPIO_PIN_SET);
+
+		shreg_set_1V0_en(1, plane);
+		break;
+
+	case V_1V10:
+		gpio_inits.Pin = pin_b0;
+		gpio_inits.Mode = GPIO_MODE_OUTPUT_PP;
+		HAL_GPIO_Init(p_port_b0, &gpio_inits);
+
+		gpio_inits.Pin = pin_b1;
+		gpio_inits.Mode = GPIO_MODE_OUTPUT_PP;
+		HAL_GPIO_Init(p_port_b1, &gpio_inits);
+
+		HAL_GPIO_WritePin(p_port_b0, pin_b0, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(p_port_b1, pin_b1, GPIO_PIN_SET);
+
+		shreg_set_1V0_en(1, plane);
+		break;
+
+	case V_1V15:
+		gpio_inits.Pin = pin_b0;
+		gpio_inits.Mode = GPIO_MODE_INPUT;
+		HAL_GPIO_Init(p_port_b0, &gpio_inits);
+
+		gpio_inits.Pin = pin_b1;
+		gpio_inits.Mode = GPIO_MODE_OUTPUT_PP;
+		HAL_GPIO_Init(p_port_b1, &gpio_inits);
+
+		HAL_GPIO_WritePin(p_port_b1, pin_b1, GPIO_PIN_SET);
+
+		shreg_set_1V0_en(1, plane);
+		break;
+
+	case V_1V20:
+		gpio_inits.Pin = pin_b0;
+		gpio_inits.Mode = GPIO_MODE_OUTPUT_PP;
+		HAL_GPIO_Init(p_port_b0, &gpio_inits);
+
+		gpio_inits.Pin = pin_b1;
+		gpio_inits.Mode = GPIO_MODE_OUTPUT_PP;
+		HAL_GPIO_Init(p_port_b1, &gpio_inits);
+
+		HAL_GPIO_WritePin(p_port_b0, pin_b0, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(p_port_b1, pin_b1, GPIO_PIN_SET);
+
+		shreg_set_1V0_en(1, plane);
+		break;
+
 	}
 }
 
@@ -506,66 +564,7 @@ void board_set_lo_switch(uint8_t val)
 	}
 	return;
 }
-void board_pb_sup1_en(void)
-{
-	HAL_GPIO_WritePin(EN_SUP_1_Port, EN_SUP_1_Pin, GPIO_PIN_RESET);
-	return;
-}
-void board_pb_sup1_dis(void)
-{
-	HAL_GPIO_WritePin(EN_SUP_1_Port, EN_SUP_1_Pin, GPIO_PIN_SET);
-	return;
-}
-void board_pb_sup2_en(void)
-{
-	HAL_GPIO_WritePin(EN_SUP_2_Port, EN_SUP_2_Pin, GPIO_PIN_RESET);
-	return;
-}
-void board_pb_sup2_dis(void)
-{
-	HAL_GPIO_WritePin(EN_SUP_2_Port, EN_SUP_2_Pin, GPIO_PIN_SET);
-	return;
-}
-void board_pb_sup3_en(void)
-{
-	HAL_GPIO_WritePin(EN_SUP_3_Port, EN_SUP_3_Pin, GPIO_PIN_RESET);
-	return;
-}
-void board_pb_sup3_dis(void)
-{
-	HAL_GPIO_WritePin(EN_SUP_3_Port, EN_SUP_3_Pin, GPIO_PIN_SET);
-	return;
-}
-void board_pb_sup4_en(void)
-{
-	HAL_GPIO_WritePin(EN_SUP_4_Port, EN_SUP_4_Pin, GPIO_PIN_RESET);
-	return;
-}
-void board_pb_sup4_dis(void)
-{
-	HAL_GPIO_WritePin(EN_SUP_4_Port, EN_SUP_4_Pin, GPIO_PIN_SET);
-	return;
-}
-void board_pb_sup5_en(void)
-{
-	HAL_GPIO_WritePin(EN_SUP_5_Port, EN_SUP_5_Pin, GPIO_PIN_RESET);
-	return;
-}
-void board_pb_sup5_dis(void)
-{
-	HAL_GPIO_WritePin(EN_SUP_5_Port, EN_SUP_5_Pin, GPIO_PIN_SET);
-	return;
-}
-void board_pb_lcl5v_en(void)
-{
-	HAL_GPIO_WritePin(EN_POW_BOARD_Port, EN_POW_BOARD_Pin, GPIO_PIN_RESET);
-	return;
-}
-void board_pb_lcl5v_dis(void)
-{
-	HAL_GPIO_WritePin(EN_POW_BOARD_Port, EN_POW_BOARD_Pin, GPIO_PIN_SET);
-	return;
-}
+
 #endif
 void board_init(void) {
 	MX_GPIO_Init();
@@ -573,6 +572,12 @@ void board_init(void) {
 	MX_SPI1_Init();
 
 	init_shreg();
+
+	for (uint8_t ic_id=1; ic_id <= G_MAX_ICS_PER_UC; ic_id++)
+	{
+		board_1v_control(ic_id, V_0V00);
+	}
+
 
 	g_mutex_i2c_op = xSemaphoreCreateMutex();
 	if (NULL == g_mutex_i2c_op) {
