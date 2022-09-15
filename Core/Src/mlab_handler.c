@@ -220,11 +220,25 @@ static uint16_t handle_command(mlab_data_t *raw_data_p) {
 		break;
 	}
 
+	case G_UC_REFCLK: {
+		synth_refclk_data_t *local_reg_ptr;
+		val_gen_t val;
+		uint8_t synth_id;
+
+		local_reg_ptr = (synth_refclk_data_t*) (&raw_data_p->data[0]);
+		val = local_reg_ptr->val;
+		synth_id = local_reg_ptr->synth_id;
+
+		trace_printf("command: synthesizer refclk enable/disable, synth:%d en:%d\n",synth_id ,val);
+
+		shref_set_synth_refclk(synth_id, val);
+		break;
+	}
+
 	case G_UC_RX_BB_SW:
 	case G_UC_TX_BB_AMP:
 	case G_UC_IREF:
 	case G_UC_2V0_POWER:
-	case G_UC_REFCLK:
 
 	case G_UC_PA_GATE_BIAS:
 		trace_printf("TODO:command not implemented yet\n");
@@ -346,6 +360,24 @@ static uint8_t sanity_check(mlab_data_t *raw_data_p) {
 			return sane;
 		}
 	}
+
+	if (raw_data_p->command_code == G_UC_REFCLK) {
+		synth_refclk_data_t *local_reg_ptr;
+		//val_gen_t val;
+		uint8_t synth_id;
+
+		local_reg_ptr = (synth_refclk_data_t*) (&raw_data_p->data[0]);
+		//val = local_reg_ptr->val;
+		synth_id = local_reg_ptr->synth_id;
+
+		if ((synth_id > 2) || (synth_id < 1))
+		{
+		trace_printf("invalid synthesizer ID\n");
+		sane = 0;
+		return sane;
+		}
+	}
+
 	sane = 1;
 	return sane;
 }

@@ -92,6 +92,12 @@ typedef struct __attribute__((packed)) {
 	val_1v_t val;
 } pow1_1v_data_t;
 
+typedef struct __attribute__((packed)) {
+	uint8_t synth_id;
+	val_gen_t val;
+} synth_refclk_data_t;
+
+
 typedef uint32_t pa_regu_pln_t; // 2V PA regulator enable plane R1(1,2,5,6), R2(3,4,7,8)
 
 typedef struct __attribute__((packed)) {

@@ -103,6 +103,32 @@ void shreg_set_1V0_en(uint8_t en, pow_plane_t plane) {
 	return;
 }
 
+void shref_set_synth_refclk(uint8_t synth_id, val_gen_t val)
+{
+	uint8_t idx;
+
+	switch (synth_id) {
+	case 1:
+		idx = REFCLK_SYNTH1_EN_IDX;
+		break;
+	case 2:
+		idx = REFCLK_SYNTH2_EN_IDX;
+		break;
+	default:
+		trace_printf("invalid synth id");
+		Error_Handler();
+		break;
+	}
+
+	if (val == V_ENABLE)
+		g_shreg_data[idx] = 0;  // enable is active low
+	else
+		g_shreg_data[idx] = 1;
+
+	clkout_data();
+
+	return;
+}
 void shreg_set_1V5_en(uint8_t en) {
 	if (en)
 		g_shreg_data[VDD_1V5_EN_IDX] = 1;  // enable is active high

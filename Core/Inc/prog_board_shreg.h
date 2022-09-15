@@ -39,6 +39,7 @@
 #define REFCLK_SYNTH2_EN_IDX	(55)
 #define PIN_LE_IDX(n) 			(n>=9?(56+n-9):(65+n))
 
+void shref_set_synth_refclk(uint8_t synth_id, val_gen_t val);
 void shreg_set_1V0_en(uint8_t en, pow_plane_t plane);
 void shreg_set_1V5_en(uint8_t en);
 void shreg_set_2V75_en(uint8_t en);
