@@ -235,9 +235,22 @@ static uint16_t handle_command(mlab_data_t *raw_data_p) {
 		break;
 	}
 
+	case G_UC_IREF: {
+		uint8_t ic_id;
+		val_iref_t *pval;
+
+		ic_id = raw_data_p->ic_id;
+		pval = (val_iref_t*) (&raw_data_p->data[0]);
+
+		trace_printf("command: iref enable/disable, icid:%d en:%d\n", ic_id,
+				*pval);
+
+		shreg_set_iref(ic_id, (val_gen_t) *pval);
+		break;
+	}
+
 	case G_UC_RX_BB_SW:
 	case G_UC_TX_BB_AMP:
-	case G_UC_IREF:
 	case G_UC_2V0_POWER:
 
 	case G_UC_PA_GATE_BIAS:

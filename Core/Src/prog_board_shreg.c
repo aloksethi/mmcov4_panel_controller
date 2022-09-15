@@ -103,8 +103,7 @@ void shreg_set_1V0_en(uint8_t en, pow_plane_t plane) {
 	return;
 }
 
-void shref_set_synth_refclk(uint8_t synth_id, val_gen_t val)
-{
+void shref_set_synth_refclk(uint8_t synth_id, val_gen_t val) {
 	uint8_t idx;
 
 	switch (synth_id) {
@@ -129,6 +128,7 @@ void shref_set_synth_refclk(uint8_t synth_id, val_gen_t val)
 
 	return;
 }
+
 void shreg_set_1V5_en(uint8_t en) {
 	if (en)
 		g_shreg_data[VDD_1V5_EN_IDX] = 1;  // enable is active high
@@ -156,6 +156,22 @@ void shreg_set_le(uint8_t ic_id) {
 	g_shreg_data[idx] = 1;
 	clkout_data();
 	g_shreg_data[idx] = 0;
+	clkout_data();
+	return;
+}
+
+void shreg_set_iref(uint8_t ic_id, val_gen_t val) {
+	uint8_t idx1, idx2;
+	idx1 = IREF1_ICn_EN_IDX(ic_id);
+	idx2 = IREF2_ICn_EN_IDX(ic_id);
+
+	if (val == V_ENABLE) {
+		g_shreg_data[idx1] = 1;
+		g_shreg_data[idx2] = 1;
+	} else {
+		g_shreg_data[idx1] = 0;
+		g_shreg_data[idx2] = 0;
+	}
 	clkout_data();
 	return;
 }

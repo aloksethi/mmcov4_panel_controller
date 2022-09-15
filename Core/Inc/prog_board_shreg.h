@@ -44,5 +44,6 @@ void shreg_set_1V0_en(uint8_t en, pow_plane_t plane);
 void shreg_set_1V5_en(uint8_t en);
 void shreg_set_2V75_en(uint8_t en);
 void shreg_set_le(uint8_t ic_id);
+void shreg_set_iref(uint8_t ic_id, val_gen_t val);
 
 #endif /* INC_PROG_BOARD_SHREG_H_ */
