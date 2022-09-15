@@ -33,7 +33,7 @@
 #define G_UC_1V0_POWER						14
 #define G_UC_REFCLK							15
 #define G_UC_RX_BB_SW						16
-#define G_UC_TX_BB_AMP						17
+#define G_UC_RX_BB_AMP						17
 #define G_UC_IREF							18
 #define G_UC_PA_GATE_BIAS					19
 #define G_UC_2V75_POWER						20
