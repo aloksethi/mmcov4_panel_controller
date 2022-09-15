@@ -70,8 +70,9 @@ typedef enum __attribute__((__packed__))
 {
 	V_ENABLE = 1,
 	V_DISABLE = 0,
-} val_1v5_t;
+} val_gen_t;
 
+typedef val_gen_t val_1v5_t;
 
 typedef struct __attribute__((packed)) {
 	uint8_t reg_id;		// latch id
