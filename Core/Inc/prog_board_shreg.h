@@ -37,7 +37,7 @@
 #define VDD_2V75_EN_IDX			(53)
 #define REFCLK_SYNTH1_EN_IDX	(54)
 #define REFCLK_SYNTH2_EN_IDX	(55)
-#define PIN_LE_IDX(n) 			(n>=9?(56+n-9):(65+n))
+#define PIN_LE_IDX(n) 			(n>=9?(56+n-9):(64+n-1))
 
 void shref_set_synth_refclk(uint8_t synth_id, val_gen_t val);
 void shreg_set_1V0_en(uint8_t en, pow_plane_t plane);
@@ -45,5 +45,7 @@ void shreg_set_1V5_en(uint8_t en);
 void shreg_set_2V75_en(uint8_t en);
 void shreg_set_le(uint8_t ic_id);
 void shreg_set_iref(uint8_t ic_id, val_gen_t val);
-
+void shreg_set_bb_sw(uint8_t ic_id, val_gen_t val);
+void shreg_set_bb_amp(uint8_t ic_id, val_gen_t val);
+void init_shreg(void);
 #endif /* INC_PROG_BOARD_SHREG_H_ */

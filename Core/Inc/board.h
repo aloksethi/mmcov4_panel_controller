@@ -112,8 +112,11 @@ extern SemaphoreHandle_t g_mutex_spi_op;
 #define REG1V_B1_R2_GPIO_Port GPIOB
 
 pow_plane_t board_icid_to_pow_plane(uint8_t ic_id);
+void board_synth_write_reg(synth_config_data_t *ptr);
+void board_synth_read_reg(synth_config_data_t *ptr);
 void board_green_led_off(void);
 void board_blue_led_off(void);
+void board_red_led_on(void);
 void board_red_led_toggle(void);
 void board_green_led_toggle(void);
 void board_blue_led_toggle(void);

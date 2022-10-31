@@ -161,7 +161,24 @@ static uint16_t handle_command(mlab_data_t *raw_data_p) {
 	}
 
 	case G_UC_SYNTH_CONFIG: {
-		trace_printf("command: TODO: synth_config not implemeted\n");
+		synth_config_data_t *local_reg_ptr;
+		uint8_t synth_id, reg;
+		uint16_t val;
+
+		trace_printf("command: synth_config\n");
+
+		local_reg_ptr = (synth_config_data_t*) (&raw_data_p->data[0]);
+
+
+		synth_id = local_reg_ptr->synth_id;
+		reg = local_reg_ptr->reg_num;
+		val = local_reg_ptr->data;
+
+		trace_printf("synth:%d reg:%x val:%x\n", synth_id, reg, val);
+		board_synth_write_reg(local_reg_ptr);
+
+		board_synth_read_reg(local_reg_ptr);
+
 
 		break;
 	}
@@ -229,7 +246,9 @@ static uint16_t handle_command(mlab_data_t *raw_data_p) {
 		val = local_reg_ptr->val;
 		synth_id = local_reg_ptr->synth_id;
 
-		trace_printf("command: synthesizer refclk enable/disable, synth:%d en:%d\n",synth_id ,val);
+		trace_printf(
+				"command: synthesizer refclk enable/disable, synth:%d en:%d\n",
+				synth_id, val);
 
 		shref_set_synth_refclk(synth_id, val);
 		break;
@@ -249,8 +268,32 @@ static uint16_t handle_command(mlab_data_t *raw_data_p) {
 		break;
 	}
 
-	case G_UC_RX_BB_SW:
-	case G_UC_TX_BB_AMP:
+	case G_UC_RX_BB_SW: {
+		uint8_t ic_id;
+		val_iref_t *pval;
+
+		ic_id = raw_data_p->ic_id;
+		pval = (val_iref_t*) (&raw_data_p->data[0]);
+
+		trace_printf("command: BB SW enable/disable, icid:%d en:%d\n", ic_id,
+				*pval);
+
+		shreg_set_bb_sw(ic_id, (val_gen_t) *pval);
+		break;
+	}
+	case G_UC_RX_BB_AMP: {
+		uint8_t ic_id;
+		val_iref_t *pval;
+
+		ic_id = raw_data_p->ic_id;
+		pval = (val_iref_t*) (&raw_data_p->data[0]);
+
+		trace_printf("command: BB amp enable/disable, icid:%d en:%d\n", ic_id,
+				*pval);
+
+		shreg_set_bb_amp(ic_id, (val_gen_t) *pval);
+		break;
+	}
 	case G_UC_2V0_POWER:
 
 	case G_UC_PA_GATE_BIAS:
@@ -383,11 +426,21 @@ static uint8_t sanity_check(mlab_data_t *raw_data_p) {
 		//val = local_reg_ptr->val;
 		synth_id = local_reg_ptr->synth_id;
 
-		if ((synth_id > 2) || (synth_id < 1))
-		{
-		trace_printf("invalid synthesizer ID\n");
-		sane = 0;
-		return sane;
+		if ((synth_id > 2) || (synth_id < 1)) {
+			trace_printf("invalid synthesizer ID\n");
+			sane = 0;
+			return sane;
+		}
+	}
+
+	if ((raw_data_p->command_code == G_UC_RX_BB_SW)
+			|| (raw_data_p->command_code == G_UC_RX_BB_AMP)) {
+		uint8_t ic_id = raw_data_p->ic_id;
+
+		if (!((ic_id == 1) || (ic_id == 6) || (ic_id == 11) || (ic_id == 16))) {
+			trace_printf("invalid ic_id for this command\n");
+			sane = 0;
+			return sane;
 		}
 	}
 

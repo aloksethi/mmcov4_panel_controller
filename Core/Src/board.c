@@ -81,7 +81,7 @@ static void MX_SPI1_Init(void) {
 	g_hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
 	g_hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
 	g_hspi1.Init.NSS = SPI_NSS_SOFT;
-	g_hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+	g_hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
 	g_hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
 	g_hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
 	g_hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -171,7 +171,7 @@ static void MX_GPIO_Init(void) {
 			| LED_BLUE_Pin | REG1V_B1_R2_Pin;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;  //GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 	/*Configure GPIO pins : STLK_RX_Pin STLK_TX_Pin */
@@ -219,7 +219,15 @@ static void MX_GPIO_Init(void) {
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(IC_CLK_9_2_16_GPIO_Port, &GPIO_InitStruct);
-
+#if 0
+	/*Configure GPIO pins : PA5, PA6, PB5 */
+	GPIO_InitStruct.Pin = GPIO_PIN_5 | GPIO_PIN_6;
+	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+	GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+#endif
 }
 
 pow_plane_t board_icid_to_pow_plane(uint8_t ic_id) {
@@ -256,6 +264,97 @@ pow_plane_t board_icid_to_pow_plane(uint8_t ic_id) {
 	return region;
 }
 
+void board_synth_write_reg(synth_config_data_t *ptr) {
+	GPIO_TypeDef *p_port;
+	uint16_t pin;
+	uint8_t synth_id, reg;
+	uint16_t val;
+	HAL_StatusTypeDef ret;
+	uint8_t dtx[3];
+
+	synth_id = ptr->synth_id;
+	reg = ptr->reg_num;
+	val = ptr->data;
+
+	reg = reg & 0x7f; // for writing, the msb bit A7 should be zero
+	dtx[0] = reg;
+	dtx[1] = (val & 0xff00) >> 8;
+	dtx[2] = (val & 0x00ff);
+	
+	switch (synth_id) {
+	case 1:
+		p_port = SYNTH_LATCH_GPIO_Port;
+		pin = SYNTH_LATCH_Pin;
+		break;
+
+	case 2:
+		p_port = SYNTH2_LATCH_GPIO_Port;
+		pin = SYNTH2_LATCH_Pin;
+		break;
+
+	default:
+		Error_Handler();
+	}
+
+	HAL_GPIO_WritePin(p_port, pin, GPIO_PIN_RESET);
+
+	ret = HAL_SPI_Transmit(&g_hspi1, dtx, sizeof(dtx), HAL_MAX_DELAY);
+	if (ret == HAL_ERROR) {
+		trace_printf("failed to write SPI");
+		board_red_led_on();
+	}
+	HAL_GPIO_WritePin(p_port, pin, GPIO_PIN_SET);
+
+	trace_printf("dtx[0]: %x dtx[1]:%x dtx[2]:%x\n", dtx[0], dtx[1], dtx[2]);
+	return;
+}
+
+void board_synth_read_reg(synth_config_data_t *ptr) {
+	GPIO_TypeDef *p_port;
+	uint16_t pin;
+	uint8_t synth_id, reg;
+	uint16_t val;
+	HAL_StatusTypeDef ret;
+	uint8_t dtx[3], drx[3];
+
+	synth_id = ptr->synth_id;
+	reg = ptr->reg_num;
+	val = ptr->data;
+
+	reg = reg | 0x80; // for reading, the msb bit A7 should be one
+	dtx[0] = reg;
+
+	switch (synth_id) {
+	case 1:
+		p_port = SYNTH_LATCH_GPIO_Port;
+		pin = SYNTH_LATCH_Pin;
+		break;
+
+	case 2:
+		p_port = SYNTH2_LATCH_GPIO_Port;
+		pin = SYNTH2_LATCH_Pin;
+		break;
+
+	default:
+		Error_Handler();
+	}
+
+	HAL_GPIO_WritePin(p_port, pin, GPIO_PIN_RESET);
+
+	ret = HAL_SPI_TransmitReceive(&g_hspi1, dtx, drx, sizeof(dtx),
+			HAL_MAX_DELAY);
+
+	if (ret == HAL_ERROR) {
+		trace_printf("failed to read SPI");
+		board_red_led_on();
+	}
+	HAL_GPIO_WritePin(p_port, pin, GPIO_PIN_SET);
+
+//	trace_printf("dtx[0]: %x dtx[1]:%x dtx[2]:%x", dtx[0], dtx[1], dtx[2]);
+	trace_printf("drx[0]: %x drx[1]:%x drx[2]:%x\n", drx[0], drx[1], drx[2]);
+	return;
+}
+
 void board_green_led_off(void) {
 	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
 	return;
@@ -265,6 +364,10 @@ void board_blue_led_off(void) {
 	return;
 }
 
+void board_red_led_on(void) {
+	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+	return;
+}
 void board_red_led_toggle(void) {
 	HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
 	return;

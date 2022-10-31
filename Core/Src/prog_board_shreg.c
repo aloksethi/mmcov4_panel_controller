@@ -153,6 +153,9 @@ void shreg_set_le(uint8_t ic_id) {
 	uint8_t idx;
 	idx = PIN_LE_IDX(ic_id);
 
+	if (idx >= BOARD_SHREG_LEN) {
+		Error_Handler();
+	}
 	g_shreg_data[idx] = 1;
 	clkout_data();
 	g_shreg_data[idx] = 0;
@@ -164,6 +167,80 @@ void shreg_set_iref(uint8_t ic_id, val_gen_t val) {
 	uint8_t idx1, idx2;
 	idx1 = IREF1_ICn_EN_IDX(ic_id);
 	idx2 = IREF2_ICn_EN_IDX(ic_id);
+
+	if (val == V_ENABLE) {
+		g_shreg_data[idx1] = 1;
+		g_shreg_data[idx2] = 1;
+	} else {
+		g_shreg_data[idx1] = 0;
+		g_shreg_data[idx2] = 0;
+	}
+	clkout_data();
+	return;
+}
+
+void shreg_set_bb_sw(uint8_t ic_id, val_gen_t val) {
+	uint8_t idx1, idx2;
+
+	switch (ic_id) {
+	case 1:
+		idx1 = RX_BB_SW_IC1_I_EN_IDX;
+		idx2 = RX_BB_SW_IC1_Q_EN_IDX;
+		break;
+	case 6:
+		idx1 = RX_BB_SW_IC6_I_EN_IDX;
+		idx2 = RX_BB_SW_IC6_Q_EN_IDX;
+		break;
+	case 11:
+		idx1 = RX_BB_SW_IC11_I_EN_IDX;
+		idx2 = RX_BB_SW_IC11_Q_EN_IDX;
+		break;
+	case 16:
+		idx1 = RX_BB_SW_IC16_I_EN_IDX;
+		idx2 = RX_BB_SW_IC16_Q_EN_IDX;
+		break;
+	default:
+		trace_printf("invalid ic id");
+		Error_Handler();
+		break;
+	}
+
+	if (val == V_ENABLE) {
+		g_shreg_data[idx1] = 1;
+		g_shreg_data[idx2] = 1;
+	} else {
+		g_shreg_data[idx1] = 0;
+		g_shreg_data[idx2] = 0;
+	}
+	clkout_data();
+	return;
+}
+
+void shreg_set_bb_amp(uint8_t ic_id, val_gen_t val) {
+	uint8_t idx1, idx2;
+
+	switch (ic_id) {
+	case 1:
+		idx1 = BB_AMP_IC1_I_EN_IDX;
+		idx2 = BB_AMP_IC1_Q_EN_IDX;
+		break;
+	case 6:
+		idx1 = BB_AMP_IC6_I_EN_IDX;
+		idx2 = BB_AMP_IC6_Q_EN_IDX;
+		break;
+	case 11:
+		idx1 = BB_AMP_IC11_I_EN_IDX;
+		idx2 = BB_AMP_IC11_Q_EN_IDX;
+		break;
+	case 16:
+		idx1 = BB_AMP_IC16_I_EN_IDX;
+		idx2 = BB_AMP_IC16_Q_EN_IDX;
+		break;
+	default:
+		trace_printf("invalid ic id");
+		Error_Handler();
+		break;
+	}
 
 	if (val == V_ENABLE) {
 		g_shreg_data[idx1] = 1;
